@@ -1,6 +1,6 @@
 use structopt::StructOpt;
 
-use advent2020::day1;
+use advent2020::get_days;
 
 #[derive(StructOpt)]
 struct Cli {
@@ -10,13 +10,13 @@ struct Cli {
 fn main() {
     println!("Advent Of Code 2020");
 
-    let day_exec: Vec<Box<dyn Fn()>> = vec![Box::new(day1::main)];
+    let days = get_days();
 
     let args = Cli::from_args();
 
-    println!("Day {}", args.puzzle.unwrap_or(day_exec.len()));
+    println!("Day {}", args.puzzle.unwrap_or(days.len()));
     match args.puzzle {
-        None => day_exec.last().unwrap()(),
-        Some(n) => day_exec.get(n - 1).expect("invalid day")(),
+        None => days.last().unwrap()(),
+        Some(n) => days.get(n - 1).expect("invalid day")(),
     }
 }

@@ -20,8 +20,7 @@ pub fn get_data(input: String) -> Vec<usize> {
 pub fn main() {
     let expenses = get_data(get_string("day1.txt"));
     for n in 2..=3 {
-        for mut values in calc(expenses.to_vec(), n)
-        {
+        for mut values in calc(expenses.to_vec(), n) {
             values.sort_unstable();
             println!(
                 "{} = {}",
