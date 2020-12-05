@@ -78,7 +78,7 @@ pub fn calc(map: &Map, traverse: Xy) -> usize {
 
 pub fn main() {
     let map = get_data(get_string("day3.txt"));
-    // println!("{}", map);
+    println!("{}", map);
 
     println!("Part 1: {} trees", calc(&map, Xy { x: 3, y: 1 }));
 
@@ -93,7 +93,7 @@ pub fn main() {
     .map(|traverse| calc(&map, traverse))
     .collect();
     println!(
-        "Part 2: {} = {}",
+        "Part 2: {} = {} trees",
         trees
             .to_vec()
             .into_iter()

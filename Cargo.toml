@@ -12,6 +12,7 @@ itertools = "0.9.0"
 recap = "0.1"
 serde = "1"
 colored = "2"
+indicatif = "0.15"
 
 [dev-dependencies]
 criterion = "0.3"
