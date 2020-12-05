@@ -19,8 +19,6 @@ pub fn get_data(input: String) -> Vec<PasswordEntry> {
         .collect()
 }
 
-pub fn calc() {}
-
 pub fn main() {
     let database = get_data(get_string("day2.txt"));
     // println!("{:#?}", database.first().unwrap());
