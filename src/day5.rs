@@ -1,4 +1,5 @@
 use crate::get_string;
+use crate::{Day, Parts};
 
 pub fn get_data(input: String) -> Vec<String> {
     input.lines().map(String::from).collect()
@@ -59,7 +60,7 @@ pub fn calc(pass: &str) -> (usize, usize) {
     (row, seat)
 }
 
-pub fn main() {
+pub fn main() -> Day {
     let passes = get_data(get_string("day5.txt"));
     // println!("{:#?}", passes[0]);
 
@@ -69,7 +70,7 @@ pub fn main() {
         .map(|(row, seat)| row * SEATS_IN_ROW + seat)
         .max()
         .unwrap();
-    println!("Part 1: {} is max Seat ID", max_seatid);
+    let part1_display = format!("{} is the maximum Seat ID", max_seatid);
 
     let mut seatids: Vec<usize> = passes
         .iter()
@@ -78,7 +79,7 @@ pub fn main() {
         .collect();
     seatids.sort_unstable();
     // println!("{:#?}", seatids);
-    let seatid = seatids
+    let my_seatid = seatids
         .windows(2)
         .filter_map(|win| match win[1] - win[0] {
             2 => Some(win[0] + 1),
@@ -86,6 +87,22 @@ pub fn main() {
         })
         .next()
         .unwrap();
+    let part2_display = format!("{} is my Seat ID", my_seatid);
 
-    println!("Part 2: {} is my Seat ID", seatid);
+    Day {
+        answers: Parts(max_seatid.to_string(), my_seatid.to_string()),
+        display: Parts(part1_display, part2_display),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_main() {
+        let day = main();
+        assert_eq!(day.answers.0, "935");
+        assert_eq!(day.answers.1, "743");
+    }
 }

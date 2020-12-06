@@ -8,14 +8,23 @@ pub mod day4;
 pub mod day5;
 pub mod day6;
 
-pub fn get_days() -> Vec<Box<dyn Fn()>> {
+#[derive(Debug)]
+pub struct Parts(pub String, pub String);
+
+#[derive(Debug)]
+pub struct Day {
+    pub answers: Parts,
+    pub display: Parts,
+}
+
+pub fn get_days() -> Vec<fn() -> Day> {
     vec![
-        Box::new(day1::main),
-        Box::new(day2::main),
-        Box::new(day3::main),
-        Box::new(day4::main),
-        Box::new(day5::main),
-        Box::new(day6::main),
+        day1::main,
+        day2::main,
+        day3::main,
+        day4::main,
+        day5::main,
+        day6::main,
     ]
 }
 

@@ -2,6 +2,7 @@ use itertools::Itertools;
 use std::collections::HashSet;
 
 use crate::get_string;
+use crate::{Day, Parts};
 
 pub fn get_data(input: String) -> Vec<Vec<HashSet<char>>> {
     input
@@ -18,7 +19,7 @@ pub fn get_data(input: String) -> Vec<Vec<HashSet<char>>> {
         .collect()
 }
 
-pub fn main() {
+pub fn main() -> Day {
     let groups = get_data(get_string("day6.txt"));
     // println!("{:#?}", groups[0]);
 
@@ -30,9 +31,10 @@ pub fn main() {
             })
         })
         .collect();
-    println!(
-        "Part 1: {} = {} ...",
-        union_groups.iter().map(|g| g.len()).sum::<usize>(),
+    let part1_answer = union_groups.iter().map(|g| g.len()).sum::<usize>();
+    let part1_display = format!(
+        "{} = {} ...",
+        part1_answer,
         union_groups
             .iter()
             .map(|g| String::from("'") + &g.iter().join("") + "'")
@@ -44,18 +46,36 @@ pub fn main() {
         .iter()
         .map(|group| {
             group.iter().fold(
-                (b'a'..=b'z').map(|c| c as char).collect::<HashSet<_>>(),
+                ('a'..='z').into_iter().collect::<HashSet<_>>(),
                 |acc, person| acc.intersection(&person).copied().collect(),
             )
         })
         .collect();
-    println!(
-        "Part 2: {} = {} ...",
-        intersection_groups.iter().map(|g| g.len()).sum::<usize>(),
+    let part2_answer = intersection_groups.iter().map(|g| g.len()).sum::<usize>();
+    let part2_display = format!(
+        "{} = {} ...",
+        part2_answer,
         intersection_groups
             .iter()
             .map(|g| String::from("'") + &g.iter().join("") + "'")
             .take(10)
             .join(" + "),
     );
+
+    Day {
+        answers: Parts(part1_answer.to_string(), part2_answer.to_string()),
+        display: Parts(part1_display, part2_display),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_main() {
+        let day = main();
+        assert_eq!(day.answers.0, "6809");
+        assert_eq!(day.answers.1, "3394");
+    }
 }

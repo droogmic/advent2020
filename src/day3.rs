@@ -4,6 +4,7 @@ use colored::*;
 use itertools::Itertools;
 
 use crate::get_string;
+use crate::{Day, Parts};
 
 #[derive(Clone)]
 pub enum Pos {
@@ -63,24 +64,25 @@ pub fn get_data(input: String) -> Map {
     map
 }
 
-pub fn calc(map: &Map, traverse: Xy) -> usize {
+pub fn traverse(map: &Map, trajectory: Xy) -> usize {
     let mut pos = Xy { x: 0, y: 0 };
     let mut tree_count: usize = 0;
     while pos.y < map.columns.first().unwrap().len() {
         if let Pos::Tree = map.columns[pos.x][pos.y] {
             tree_count += 1
         }
-        pos.y += traverse.y;
-        pos.x = (pos.x + traverse.x) % map.columns.len();
+        pos.y += trajectory.y;
+        pos.x = (pos.x + trajectory.x) % map.columns.len();
     }
     tree_count
 }
 
-pub fn main() {
+pub fn main() -> Day {
     let map = get_data(get_string("day3.txt"));
-    println!("{}", map);
+    // println!("{}", map);
 
-    println!("Part 1: {} trees", calc(&map, Xy { x: 3, y: 1 }));
+    let part1_answer = traverse(&map, Xy { x: 3, y: 1 });
+    let part1_display = format!("{} trees", part1_answer);
 
     let trees: Vec<usize> = vec![
         Xy { x: 1, y: 1 },
@@ -90,15 +92,33 @@ pub fn main() {
         Xy { x: 1, y: 2 },
     ]
     .into_iter()
-    .map(|traverse| calc(&map, traverse))
+    .map(|trajectory| traverse(&map, trajectory))
     .collect();
-    println!(
-        "Part 2: {} = {} trees",
+    let part2_answer = trees.to_vec().into_iter().product::<usize>();
+    let part2_display = format!(
+        "{} = {} trees",
+        part2_answer,
         trees
             .to_vec()
             .into_iter()
             .map(|v| v.to_string())
             .join(" × "),
-        trees.to_vec().into_iter().product::<usize>(),
     );
+
+    Day {
+        answers: Parts(part1_answer.to_string(), part2_answer.to_string()),
+        display: Parts(part1_display, part2_display),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_main() {
+        let day = main();
+        assert_eq!(day.answers.0, "156");
+        assert_eq!(day.answers.1, "3521829480");
+    }
 }

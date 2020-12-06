@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::num::ParseIntError;
 
 use crate::get_string;
+use crate::{Day, Parts};
 
 #[derive(Debug)]
 pub enum Height {
@@ -22,9 +23,9 @@ pub enum EyeColor {
 
 #[derive(Debug)]
 pub struct PassportEntry {
-    byr: Option<Result<usize, ParseIntError>>,
-    iyr: Option<Result<usize, ParseIntError>>,
-    eyr: Option<Result<usize, ParseIntError>>,
+    byr: Option<Result<usize, YearError>>,
+    iyr: Option<Result<usize, YearError>>,
+    eyr: Option<Result<usize, YearError>>,
     hgt: Option<Result<Height, HeightError>>,
     hcl: Option<Result<String, HairError>>,
     ecl: Option<Result<EyeColor, EyeError>>,
@@ -32,8 +33,18 @@ pub struct PassportEntry {
     cid: Option<String>,
 }
 
+#[derive(Debug)]
+pub enum YearError {
+    Parse(ParseIntError),
+    Range,
+}
+
 #[derive(Debug, Clone)]
-pub struct HeightError;
+pub enum HeightError {
+    Parse(ParseIntError),
+    Unit,
+    Range,
+}
 
 #[derive(Debug, Clone)]
 pub struct HairError;
@@ -43,6 +54,67 @@ pub struct EyeError;
 
 #[derive(Debug, Clone)]
 pub struct PassportError;
+
+/// Parse year
+///
+/// ```
+/// # use advent2020::day4::*;
+///
+/// let range = (10, 20);
+/// assert!(matches!(parse_year("abra", range), Err(YearError::Parse(_))));
+/// assert!(matches!(parse_year("9", range), Err(YearError::Range)));
+/// assert!(matches!(parse_year("21", range), Err(YearError::Range)));
+/// assert!(matches!(parse_year("10", range), Ok(10)));
+/// assert!(matches!(parse_year("20", range), Ok(20)));
+/// ```
+pub fn parse_year<S: AsRef<str>>(s: S, (lower, upper): (usize, usize)) -> Result<usize, YearError> {
+    match s.as_ref().parse() {
+        Err(e) => Err(YearError::Parse(e)),
+        Ok(v) => {
+            if v >= lower && v <= upper {
+                Ok(v)
+            } else {
+                Err(YearError::Range)
+            }
+        }
+    }
+}
+
+/// Parse Height
+///
+/// ```
+/// # use advent2020::day4::*;
+///
+/// assert!(matches!(parse_height("abra"), Err(HeightError::Parse(_))));
+/// assert!(matches!(parse_height("100"), Err(HeightError::Unit)));
+/// assert!(matches!(parse_height("149cm"), Err(HeightError::Range)));
+/// assert!(matches!(parse_height("194cm"), Err(HeightError::Range)));
+/// assert!(matches!(parse_height("58in"), Err(HeightError::Range)));
+/// assert!(matches!(parse_height("77in"), Err(HeightError::Range)));
+/// assert!(matches!(parse_height("150cm"), Ok(Height::Cm(150))));
+/// assert!(matches!(parse_height("76in"), Ok(Height::In(76))));
+/// ```
+pub fn parse_height<S: AsRef<str>>(s: S) -> Result<Height, HeightError> {
+    match s
+        .as_ref()
+        .trim_end_matches("cm")
+        .trim_end_matches("in")
+        .parse()
+    {
+        Err(e) => Err(HeightError::Parse(e)),
+        Ok(height) => match s.as_ref().get(s.as_ref().len() - 2..) {
+            Some("cm") => match height {
+                150..=193 => Ok(Height::Cm(height)),
+                _ => Err(HeightError::Range),
+            },
+            Some("in") => match height {
+                59..=76 => Ok(Height::In(height)),
+                _ => Err(HeightError::Range),
+            },
+            _ => Err(HeightError::Unit),
+        },
+    }
+}
 
 pub fn get_data(input: String) -> Vec<PassportEntry> {
     input
@@ -63,21 +135,10 @@ pub fn get_data(input: String) -> Vec<PassportEntry> {
                 })
                 .collect();
             PassportEntry {
-                byr: entry.get("byr").map(|s| s.parse()),
-                iyr: entry.get("iyr").map(|s| s.parse()),
-                eyr: entry.get("eyr").map(|s| s.parse()),
-                hgt: entry.get("hgt").map(|s| {
-                    let height = s
-                        .trim_end_matches("cm")
-                        .trim_end_matches("in")
-                        .parse()
-                        .unwrap();
-                    match s.get(s.len() - 2..) {
-                        Some("cm") => Ok(Height::Cm(height)),
-                        Some("in") => Ok(Height::In(height)),
-                        _ => Err(HeightError),
-                    }
-                }),
+                byr: entry.get("byr").map(|s| parse_year(s, (1920, 2002))),
+                iyr: entry.get("iyr").map(|s| parse_year(s, (2010, 2020))),
+                eyr: entry.get("eyr").map(|s| parse_year(s, (2020, 2030))),
+                hgt: entry.get("hgt").map(parse_height),
                 hcl: entry.get("hcl").map(|s| {
                     if s.starts_with('#') {
                         let s = String::from(s.trim_start_matches('#'));
@@ -109,11 +170,11 @@ pub fn get_data(input: String) -> Vec<PassportEntry> {
         .collect()
 }
 
-pub fn main() {
+pub fn main() -> Day {
     let passports = get_data(get_string("day4.txt"));
     // println!("{:#?}", passports[3]);
 
-    let valid_passports: usize = passports
+    let part1_valid_passports: usize = passports
         .iter()
         .filter(|passport| {
             passport.byr.is_some()
@@ -125,36 +186,39 @@ pub fn main() {
                 && passport.pid.is_some()
         })
         .count();
-    println!("Part 1: {} valid passports", valid_passports);
+    let part1_display = format!("{} valid passports", part1_valid_passports);
 
-    let valid_passports: usize = passports
+    let part2_valid_passports: usize = passports
         .iter()
         .filter(|passport| {
-            passport.byr.is_some()
-                && passport.byr.as_ref().unwrap().is_ok()
-                && passport.byr.as_ref().unwrap().as_ref().unwrap() >= &1920
-                && passport.byr.as_ref().unwrap().as_ref().unwrap() <= &2002
-                && passport.iyr.is_some()
-                && passport.iyr.as_ref().unwrap().is_ok()
-                && passport.iyr.as_ref().unwrap().as_ref().unwrap() >= &2010
-                && passport.iyr.as_ref().unwrap().as_ref().unwrap() <= &2020
-                && passport.eyr.is_some()
-                && passport.eyr.as_ref().unwrap().is_ok()
-                && passport.eyr.as_ref().unwrap().as_ref().unwrap() >= &2020
-                && passport.eyr.as_ref().unwrap().as_ref().unwrap() <= &2030
-                && passport.hgt.is_some()
-                && passport.hgt.as_ref().unwrap().as_ref().is_ok()
-                && match *passport.hgt.as_ref().unwrap().as_ref().unwrap() {
-                    Height::Cm(h) => h >= 150 && h <= 193,
-                    Height::In(h) => h >= 59 && h <= 76,
-                }
-                && passport.hcl.is_some()
-                && passport.hcl.as_ref().unwrap().as_ref().is_ok()
-                && passport.ecl.is_some()
-                && passport.ecl.as_ref().unwrap().as_ref().is_ok()
-                && passport.pid.is_some()
-                && passport.pid.as_ref().unwrap().as_ref().is_ok()
+            passport.byr.as_ref().map_or(false, |v| v.is_ok())
+                && passport.iyr.as_ref().map_or(false, |v| v.is_ok())
+                && passport.eyr.as_ref().map_or(false, |v| v.is_ok())
+                && passport.hgt.as_ref().map_or(false, |v| v.is_ok())
+                && passport.hcl.as_ref().map_or(false, |v| v.is_ok())
+                && passport.ecl.as_ref().map_or(false, |v| v.is_ok())
+                && passport.pid.as_ref().map_or(false, |v| v.is_ok())
         })
         .count();
-    println!("Part 2: {} valid passports", valid_passports);
+    let part2_display = format!("{} valid passports", part2_valid_passports);
+
+    Day {
+        answers: Parts(
+            part1_valid_passports.to_string(),
+            part2_valid_passports.to_string(),
+        ),
+        display: Parts(part1_display, part2_display),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_main() {
+        let day = main();
+        assert_eq!(day.answers.0, "182");
+        assert_eq!(day.answers.1, "109");
+    }
 }

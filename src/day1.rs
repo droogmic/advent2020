@@ -1,6 +1,7 @@
 use itertools::Itertools;
 
 use crate::get_string;
+use crate::{Day, Parts};
 
 pub fn calc(expenses: Vec<usize>, combinations: usize) -> Vec<Vec<usize>> {
     expenses
@@ -17,20 +18,45 @@ pub fn get_data(input: String) -> Vec<usize> {
         .collect()
 }
 
-pub fn main() {
+pub fn main() -> Day {
     let expenses = get_data(get_string("day1.txt"));
-    for n in 2..=3 {
-        for mut values in calc(expenses.to_vec(), n) {
+    match (2..=3)
+        .into_iter()
+        .map(|n| {
+            let mut matches = calc(expenses.to_vec(), n);
+            assert_eq!(matches.len(), 1);
+            let values = matches.first_mut().unwrap();
             values.sort_unstable();
-            println!(
-                "{} = {}",
-                values
-                    .to_vec()
-                    .into_iter()
-                    .map(|v| v.to_string())
-                    .join(" × "),
-                values.to_vec().into_iter().product::<usize>(),
-            );
-        }
+            let answer = values.iter().copied().product::<usize>();
+            (
+                answer,
+                format!(
+                    "{} = {}",
+                    answer,
+                    values.iter().copied().map(|v| v.to_string()).join(" × "),
+                ),
+            )
+        })
+        .collect::<Vec<(usize, String)>>()
+        .drain(..)
+        .as_slice()
+    {
+        [one, two] => Day {
+            answers: Parts(one.0.to_string(), two.0.to_string()),
+            display: Parts(one.1.to_string(), two.1.to_string()),
+        },
+        _ => panic!("Unexpected parts"),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_main() {
+        let day = main();
+        assert_eq!(day.answers.0, "158916");
+        assert_eq!(day.answers.1, "165795564");
     }
 }
