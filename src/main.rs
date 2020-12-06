@@ -1,4 +1,5 @@
 use structopt::StructOpt;
+use colored::*;
 
 use advent2020::get_days;
 use advent2020::Day;
@@ -26,7 +27,7 @@ where
 }
 
 fn main() {
-    println!("Advent Of Code 2020");
+    println!("{}", "Advent Of Code 2020".bold().blue());
     println!();
 
     let args = Cli::from_args();
@@ -47,7 +48,7 @@ fn main() {
             })
             .collect();
         std::thread::yield_now();
-        // std::thread::sleep(std::time::Duration::from_secs(1));
+        std::thread::sleep(std::time::Duration::from_millis(50));
         println!();
         for (idx, thread) in threads.into_iter().enumerate() {
             print_day(idx + 1, || thread.join().unwrap());
