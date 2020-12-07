@@ -1,5 +1,5 @@
-use structopt::StructOpt;
 use colored::*;
+use structopt::StructOpt;
 
 use advent2020::get_days;
 use advent2020::Day;

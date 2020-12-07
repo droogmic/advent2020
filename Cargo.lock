@@ -8,7 +8,9 @@ dependencies = [
  "criterion",
  "indicatif",
  "itertools",
+ "lazy_static",
  "recap",
+ "regex",
  "serde",
  "structopt",
 ]

@@ -1,4 +1,4 @@
-use criterion::{BenchmarkId, criterion_group, criterion_main, Criterion};
+use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
 
 use advent2020::get_string;
 
