@@ -26,6 +26,22 @@ where
     println!();
 }
 
+fn print_day_visual<F>(day: usize, calc: F)
+where
+    F: FnOnce() -> Day,
+{
+    println!("Day {}", day);
+    let day = calc();
+    println!();
+    if let Some(s) = day.visual {
+        println!("{}", s);
+        println!();
+    }
+    println!("Part 1: {}", day.display.0);
+    println!("Part 2: {}", day.display.1);
+    println!();
+}
+
 fn main() {
     println!("{}", "Advent Of Code 2020".bold().blue());
     println!();
@@ -59,7 +75,7 @@ fn main() {
         let days = get_days();
         match args.puzzle {
             None => print_day(days.len(), *days.last().unwrap()),
-            Some(n) => print_day(n, *days.get(n - 1).expect("invalid day")),
+            Some(n) => print_day_visual(n, *days.get(n - 1).expect("invalid day")),
         }
     }
 }

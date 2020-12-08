@@ -44,6 +44,7 @@ pub fn main() -> Day {
         [one, two] => Day {
             answers: Parts(one.0.to_string(), two.0.to_string()),
             display: Parts(one.1.to_string(), two.1.to_string()),
+            ..Default::default()
         },
         _ => panic!("Unexpected parts"),
     }

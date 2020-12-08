@@ -108,6 +108,7 @@ pub fn main() -> Day {
     Day {
         answers: Parts(part1_answer.to_string(), part2_answer.to_string()),
         display: Parts(part1_display, part2_display),
+        ..Default::default()
     }
 }
 

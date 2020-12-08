@@ -4,6 +4,7 @@ use serde::Deserialize;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::collections::HashSet;
+use std::fmt;
 use std::str::FromStr;
 
 use crate::get_string;
@@ -16,10 +17,51 @@ pub struct Bag {
     pub color: String,
 }
 
+impl fmt::Display for Bag {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} {}", self.attribute, self.color,)
+    }
+}
+
 #[derive(Debug)]
 pub struct BagRule {
     pub outer: Bag,
     pub contents: Vec<(usize, Bag)>,
+}
+
+#[derive(Debug)]
+pub struct BagNode<'a> {
+    pub val: &'a Bag,
+    pub outer: Vec<&'a Bag>,
+    pub contents: Vec<(usize, BagNode<'a>)>,
+}
+
+impl fmt::Display for BagNode<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{}\n{}",
+            self.val,
+            self.contents
+                .iter()
+                .map(|(count, node)| {
+                    format!(
+                        "{:>3} {}{}",
+                        count,
+                        node.val,
+                        node.to_string()
+                            .lines()
+                            .skip(1)
+                            .map(|line| vec!["\n".to_string(), format!("    {}", line)])
+                            .flatten()
+                            .collect::<Vec<String>>()
+                            .join(&"")
+                    )
+                })
+                .collect::<Vec<String>>()
+                .join(&"\n"),
+        )
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -61,7 +103,7 @@ pub fn get_data(input: String) -> Vec<BagRule> {
     input.lines().map(|line| line.parse().unwrap()).collect()
 }
 
-pub fn build_invert_tree<'a>(bag_rules: &'a [BagRule]) -> HashMap<&'a Bag, Vec<&'a Bag>> {
+pub fn build_invert_map<'a>(bag_rules: &'a [BagRule]) -> HashMap<&'a Bag, Vec<&'a Bag>> {
     let mut inverse_tree: HashMap<_, Vec<&Bag>> = HashMap::new();
     for bag_rule in bag_rules {
         for content in &bag_rule.contents {
@@ -76,7 +118,7 @@ pub fn build_invert_tree<'a>(bag_rules: &'a [BagRule]) -> HashMap<&'a Bag, Vec<&
     inverse_tree
 }
 
-pub fn build_tree_count<'a>(bag_rules: &'a [BagRule]) -> HashMap<&'a Bag, Vec<(usize, &'a Bag)>> {
+pub fn build_map_count<'a>(bag_rules: &'a [BagRule]) -> HashMap<&'a Bag, Vec<(usize, &'a Bag)>> {
     let mut tree: HashMap<&Bag, Vec<(usize, &Bag)>> = HashMap::new();
     for bag_rule in bag_rules {
         tree.insert(
@@ -87,17 +129,29 @@ pub fn build_tree_count<'a>(bag_rules: &'a [BagRule]) -> HashMap<&'a Bag, Vec<(u
     tree
 }
 
-pub fn walk_tree<'a>(
-    hash_map: &HashMap<&'a Bag, Vec<&'a Bag>>,
-    start: &'a Bag,
-) -> HashSet<&'a Bag> {
+pub fn build_tree<'a>(bag_rules: &'a [BagRule], start: &'a Bag) -> BagNode<'a> {
+    let inverse_map = build_invert_map(bag_rules);
+    let map = build_map_count(bag_rules);
+    BagNode {
+        val: start,
+        outer: inverse_map.get(start).unwrap().to_vec(),
+        contents: map
+            .get(start)
+            .unwrap()
+            .iter()
+            .map(|(count, bag)| (*count, build_tree(bag_rules, bag)))
+            .collect(),
+    }
+}
+
+pub fn walk_map<'a>(hash_map: &HashMap<&'a Bag, Vec<&'a Bag>>, start: &'a Bag) -> HashSet<&'a Bag> {
     let mut retval = HashSet::new();
     retval.insert(start);
     if let Some(leafs) = hash_map.get(start) {
         for leaf in leafs
             .iter()
             .cloned()
-            .map(|b| walk_tree(hash_map, b))
+            .map(|b| walk_map(hash_map, b))
             .flatten()
         {
             retval.insert(leaf);
@@ -106,7 +160,7 @@ pub fn walk_tree<'a>(
     retval
 }
 
-pub fn walk_tree_count<'a>(
+pub fn walk_map_count<'a>(
     hash_map: &HashMap<&'a Bag, Vec<(usize, &'a Bag)>>,
     start: &'a Bag,
 ) -> HashMap<&'a Bag, usize> {
@@ -120,7 +174,7 @@ pub fn walk_tree_count<'a>(
         }
         for (parent_count, child_map) in leafs
             .iter()
-            .map(|leaf| (leaf.0, walk_tree_count(hash_map, leaf.1)))
+            .map(|leaf| (leaf.0, walk_map_count(hash_map, leaf.1)))
         {
             for (bag, count) in child_map {
                 let count = parent_count * count;
@@ -142,8 +196,12 @@ pub fn main() -> Day {
         attribute: "shiny".to_string(),
         color: "gold".to_string(),
     };
-    let child_to_parent = build_invert_tree(&bag_rules);
-    let parents = walk_tree(&child_to_parent, &my_bag);
+
+    let my_bag_node = build_tree(&bag_rules, &my_bag);
+    // println!("{}", my_bag_node);
+
+    let child_to_parent = build_invert_map(&bag_rules);
+    let parents = walk_map(&child_to_parent, &my_bag);
     // println!("{:#?}", parents.iter().take(5).collect::<Vec<&&Bag>>());
     let part1_bags = parents.len() - 1; // Don't count initial bag
     let part1_display = format!(
@@ -151,8 +209,8 @@ pub fn main() -> Day {
         part1_bags
     );
 
-    let bag_to_contents = build_tree_count(&bag_rules);
-    let contents = walk_tree_count(&bag_to_contents, &my_bag);
+    let bag_to_contents = build_map_count(&bag_rules);
+    let contents = walk_map_count(&bag_to_contents, &my_bag);
     // println!("{:#?}", contents.iter().take(5).collect::<Vec<(&&Bag, &usize)>>());
     let part2_bags = contents.iter().map(|t| t.1).sum::<usize>(); // Don't count initial bag
     let part2_display = format!(
@@ -163,6 +221,8 @@ pub fn main() -> Day {
     Day {
         answers: Parts(part1_bags.to_string(), part2_bags.to_string()),
         display: Parts(part1_display, part2_display),
+        visual: Some(format!("{}", my_bag_node)),
+        // ..Default::default()
     }
 }
 

@@ -13,13 +13,14 @@ pub mod day6;
 pub mod day7;
 pub mod day8;
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Parts(pub String, pub String);
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Day {
     pub answers: Parts,
     pub display: Parts,
+    pub visual: Option<String>,
 }
 
 pub fn get_days() -> Vec<fn() -> Day> {

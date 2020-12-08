@@ -92,6 +92,7 @@ pub fn main() -> Day {
     Day {
         answers: Parts(max_seatid.to_string(), my_seatid.to_string()),
         display: Parts(part1_display, part2_display),
+        ..Default::default()
     }
 }
 

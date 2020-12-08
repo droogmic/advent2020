@@ -55,6 +55,7 @@ pub fn main() -> Day {
             part_2_valid_count.to_string(),
         ),
         display: Parts(part1, part2),
+        ..Default::default()
     }
 }
 

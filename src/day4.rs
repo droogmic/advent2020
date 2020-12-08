@@ -208,6 +208,7 @@ pub fn main() -> Day {
             part2_valid_passports.to_string(),
         ),
         display: Parts(part1_display, part2_display),
+        ..Default::default()
     }
 }
 
