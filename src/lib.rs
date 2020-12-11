@@ -12,6 +12,7 @@ pub mod day5;
 pub mod day6;
 pub mod day7;
 pub mod day8;
+pub mod day9;
 
 #[derive(Debug, Default)]
 pub struct Parts(pub String, pub String);
@@ -33,6 +34,7 @@ pub fn get_days() -> Vec<fn() -> Day> {
         day6::main,
         day7::main,
         day8::main,
+        day9::main,
     ]
 }
 
