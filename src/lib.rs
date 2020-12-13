@@ -5,6 +5,7 @@ use std::format;
 use std::fs;
 
 pub mod day1;
+pub mod day10;
 pub mod day2;
 pub mod day3;
 pub mod day4;
@@ -35,6 +36,7 @@ pub fn get_days() -> Vec<fn() -> Day> {
         day7::main,
         day8::main,
         day9::main,
+        day10::main,
     ]
 }
 
