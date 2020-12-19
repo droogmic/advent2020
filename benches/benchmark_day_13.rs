@@ -17,8 +17,8 @@ pub fn benchmark(c: &mut Criterion) {
     group.bench_function("find_time_thread", |b| {
         b.iter(|| day13::find_time_thread(black_box(&busses), black_box(0)))
     });
-    group.bench_function("find_time_euclidian", |b| {
-        b.iter(|| day13::euclidian_busses(black_box(&busses), black_box(0)))
+    group.bench_function("find_time_chinese_remaindern", |b| {
+        b.iter(|| day13::chinese_remainder_busses(black_box(&busses), black_box(0)))
     });
     group.finish();
 }

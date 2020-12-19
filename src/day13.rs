@@ -171,7 +171,7 @@ fn case_of_two_moduli(a: (i128, i128), b: (i128, i128)) -> (i128, i128) {
     )
 }
 
-pub fn euclidian_busses(busses: &[Bus], _start: u64) -> u64 {
+pub fn chinese_remainder_busses(busses: &[Bus], _start: u64) -> u64 {
     let congruence_solution = busses
         .iter()
         .enumerate()
@@ -232,7 +232,7 @@ pub fn main() -> Day {
     );
 
     let start = 0;
-    let time = euclidian_busses(&busses, start);
+    let time = chinese_remainder_busses(&busses, start);
     let part2_display = format!("{} = is the earliest timestamp", time);
 
     Day {
@@ -266,7 +266,7 @@ mod tests {
             ),
             ("find_time_loop_max", find_time_loop_max),
             ("find_time_thread", find_time_thread),
-            ("euclidian_busses", euclidian_busses),
+            ("euclidian_busses", chinese_remainder_busses),
         ]
         .iter()
         {
