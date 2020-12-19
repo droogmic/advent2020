@@ -1,22 +1,8 @@
-// use std::cmp;
-// use std::collections::HashMap;
-// use std::convert::TryFrom;
 use std::fmt;
 use std::str::FromStr;
 
 use crate::get_string;
 use crate::{Day, Parts};
-
-// #[derive(Debug, Clone)]
-// pub enum Instruction {
-//     North(u32),
-//     South(u32),
-//     East(u32),
-//     West(u32),
-//     Left(u32),
-//     Right(u32),
-//     Forward(u32),
-// }
 
 #[derive(Clone, Copy)]
 pub enum InstructionAction {
@@ -259,8 +245,7 @@ impl Ferry {
             } => {
                 self.position.north += i64::from(*val) * self.waypoint.north;
                 self.position.east += i64::from(*val) * self.waypoint.east;
-            }
-            // i => panic!("{}", i),
+            } // i => panic!("{}", i),
         }
     }
 }

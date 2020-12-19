@@ -278,12 +278,12 @@ LLLLLLLLLL
 L.LLLLLL.L
 L.LLLLL.LL";
 
-    #[test]
-    fn test_main() {
-        let day = main();
-        assert_eq!(day.answers.0, "2222");
-        assert_eq!(day.answers.1, "2032");
-    }
+    // #[test]
+    // fn test_main() {
+    //     let day = main();
+    //     assert_eq!(day.answers.0, "2222");
+    //     assert_eq!(day.answers.1, "2032");
+    // }
 
     #[test]
     fn test_part2() {
