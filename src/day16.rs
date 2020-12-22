@@ -83,10 +83,7 @@ fn parse_notes(s: &str) -> Notes {
     };
     let nearby: Vec<Ticket> = {
         let nearby_ticket_lines = groups.next().unwrap();
-        assert_eq!(
-            nearby_ticket_lines.get(0).unwrap(),
-            "nearby tickets:"
-        );
+        assert_eq!(nearby_ticket_lines.get(0).unwrap(), "nearby tickets:");
         nearby_ticket_lines
             .iter()
             .skip(1)
@@ -102,9 +99,7 @@ fn parse_notes(s: &str) -> Notes {
 
 impl Rule {
     fn check_val(&self, val: usize) -> bool {
-        self.ranges.iter().any(|r| {
-            r.0 <= val && val <= r.1
-        })
+        self.ranges.iter().any(|r| r.0 <= val && val <= r.1)
     }
 }
 
