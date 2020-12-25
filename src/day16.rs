@@ -16,9 +16,18 @@ pub struct RuleStr {
     r4: String,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Rule {
     ranges: Vec<(usize, usize)>,
+}
+
+impl Rule {
+    pub fn new(a: (usize, usize), b: (usize, usize)) -> Rule {
+        Rule { ranges: vec![a, b] }
+    }
+    pub fn check_val(&self, val: usize) -> bool {
+        self.ranges.iter().any(|r| r.0 <= val && val <= r.1)
+    }
 }
 
 #[derive(Clone)]
@@ -49,7 +58,7 @@ pub struct Notes {
     nearby: Vec<Ticket>,
 }
 
-fn parse_notes(s: &str) -> Notes {
+pub fn parse_notes(s: &str) -> Notes {
     let mut groups = s
         .lines()
         .map(String::from)
@@ -97,12 +106,6 @@ fn parse_notes(s: &str) -> Notes {
     }
 }
 
-impl Rule {
-    fn check_val(&self, val: usize) -> bool {
-        self.ranges.iter().any(|r| r.0 <= val && val <= r.1)
-    }
-}
-
 // const EXAMPLE: &str = "\
 // class: 1-3 or 5-7
 // row: 6-11 or 33-44
@@ -117,9 +120,8 @@ impl Rule {
 // 55,2,20
 // 38,6,12";
 
-pub fn main() -> Day {
-    // let notes = parse_notes(EXAMPLE);
-    let notes = parse_notes(&get_string("day16.txt"));
+pub fn main_s(s: &str) -> Day {
+    let notes = parse_notes(s);
 
     let ticket_scanning_error_rate: usize = notes
         .nearby
@@ -143,12 +145,14 @@ pub fn main() -> Day {
     let rules = notes.rules;
     let ticket = notes.ticket;
     let mut nearby = notes.nearby;
+    // println!("{}", nearby.len());
     nearby.retain(|ticket| {
         ticket
             .fields
             .iter()
             .all(|&val| rules.values().any(|r| r.check_val(val)))
     });
+    // println!("{}", nearby.len());
     let fields_count = nearby.first().unwrap().fields.len();
     let valid_idx_rule: HashMap<usize, HashSet<String>> = (0..fields_count)
         .into_iter()
@@ -222,13 +226,18 @@ pub fn main() -> Day {
     }
 }
 
+pub fn main() -> Day {
+    // main_s(EXAMPLE);
+    main_s(&get_string("day16_am.txt"))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn test_main() {
-        let day = main();
+        let day = main_s(&get_string("day16.txt"));
         assert_eq!(day.answers.0, "32842");
         assert_eq!(day.answers.1, "2628667251989");
     }

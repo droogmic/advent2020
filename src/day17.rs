@@ -10,7 +10,7 @@ struct Cood {
     x: i64,
     y: i64,
     z: i64,
-    w: i64
+    w: i64,
 }
 
 impl Cood {
@@ -219,10 +219,7 @@ impl PocketDimension {
                 })
                 .count();
             let next_state = rules(
-                prev_grid
-                    .get(&cood)
-                    .cloned()
-                    .unwrap_or(CubeState::Inactive),
+                prev_grid.get(&cood).cloned().unwrap_or(CubeState::Inactive),
                 active_count,
             );
             if let CubeState::Active = next_state {
